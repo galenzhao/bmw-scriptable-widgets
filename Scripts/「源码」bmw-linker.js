@@ -23,8 +23,8 @@ let DEPENDENCIES = [
 
 let WIDGET_FONT = 'SF UI Display';
 let WIDGET_FONT_BOLD = 'SF UI Display Bold';
-let BMW_SERVER_HOST = 'https://myprofile.bmw.com.cn';
-let APP_HOST_SERVER = 'https://bmw-linker.com.api.zhis.ltd';
+let BMW_SERVER_HOST = 'https://bmw-1.api.zhis.ltd';
+let APP_HOST_SERVER = 'https://bmw-1.api.zhis.ltd';
 let JS_CDN_SERVER = 'https://cdn.jsdelivr.net/gh/opp100/bmw-scriptable-widgets/lib';
 
 let DEFAULT_BG_COLOR_LIGHT = '#FFFFFF';
@@ -1075,6 +1075,15 @@ class Widget extends Base {
         try {
             locationStr = data.properties.vehicleLocation.address.formatted;
         } catch (e) {}
+        console.log( locationStr)
+//         if(locationStr.startsWith('车辆GPS未开启')){
+          if(locationStr.split('！').length==2){
+            let ts = Date(locationStr.split('！')[1])    
+            let loc = locationStr.split('！')[0]
+//             locationStr = ts
+            locationStr = loc+'\n'+ts.split(' ')[4]
+          }
+//         }
 
         leftContainer.addSpacer();
 
