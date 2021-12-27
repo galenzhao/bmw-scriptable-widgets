@@ -743,8 +743,8 @@ const Running = async (Widget, default_args = "") => {
 
 
 let WIDGET_FILE_NAME = 'bmw-linker.js';
-let WIDGET_VERSION = 'v2.1.1';
-let WIDGET_BUILD = '21112301';
+let WIDGET_VERSION = 'v2.1.5';
+let WIDGET_BUILD = '21122102';
 let WIDGET_PREFIX = '[bmw-linker] ';
 
 let DEPENDENCIES = [
@@ -755,7 +755,8 @@ let WIDGET_FONT = 'SF UI Display';
 let WIDGET_FONT_BOLD = 'SF UI Display Bold';
 let BMW_SERVER_HOST = 'https://myprofile.bmw.com.cn';
 let APP_HOST_SERVER = 'https://bmw-linker.com';
-let JS_CDN_SERVER = 'https://cdn.jsdelivr.net/gh/opp100/bmw-scriptable-widgets/lib';
+let JS_CDN_SERVER = 'https://cdn.jsdelivr.net/gh/opp100/bmw-scriptable-widgets@main/Publish/';
+let JS_LIB_CDN_SERVER = 'https://cdn.jsdelivr.net/gh/opp100/bmw-scriptable-widgets/lib';
 
 let DEFAULT_BG_COLOR_LIGHT = '#FFFFFF';
 let DEFAULT_BG_COLOR_DARK = '#2B2B2B';
@@ -1019,7 +1020,7 @@ class Widget extends Base {
                 }
             }
 
-            const req = new Request(APP_HOST_SERVER + '/version.json');
+            const req = new Request(JS_CDN_SERVER + '/version.json');
             const res = await req.loadJSON();
 
             updateAT = new Date().valueOf();
@@ -1043,7 +1044,7 @@ class Widget extends Base {
         try {
             const fileManager = FileManager[module.filename.includes('Documents/iCloud~') ? 'iCloud' : 'local']();
 
-            const req = new Request(APP_HOST_SERVER + '/bmw-linker.js');
+            const req = new Request(JS_CDN_SERVER + '/bmw-linker.js');
             const res = await req.load();
             fileManager.write(fileManager.joinPath(fileManager.documentsDirectory(), WIDGET_FILE_NAME), res);
 
@@ -1089,7 +1090,7 @@ class Widget extends Base {
                         return console.warn('Dependency found: ' + filePath);
                     }
 
-                    const req = new Request(`${JS_CDN_SERVER}/${encodeURIComponent(js)}`);
+                    const req = new Request(`${JS_LIB_CDN_SERVER}/${encodeURIComponent(js)}`);
                     const res = await req.load();
 
                     try {
@@ -1148,7 +1149,7 @@ class Widget extends Base {
 
     async loadChangeLogs() {
         try {
-            let req = new Request(APP_HOST_SERVER + '/change_logs.text');
+            let req = new Request(JS_CDN_SERVER + '/change_logs.text');
 
             req.method = 'GET';
             let changeLog = await req.loadString();
@@ -1995,57 +1996,76 @@ class Widget extends Base {
         canvas.setTextColor(this.getFontColor());
         canvas.respectScreenScale = true;
 
-        try {
-            let checkControlMessages = this.getControlMessages(data);
+        let festivalBG = await this.getFestivalBackground();
 
-            if (checkControlMessages && checkControlMessages.length == 0) {
-                canvas.drawTextInRect(
-                    'ALL',
-                    new Rect(
-                        0, //
-                        0,
-                        Math.round(canvasWidth * 0.5),
-                        Math.round(canvasWidth * 0.5)
-                    )
-                );
-                canvas.drawTextInRect(
-                    'GOOD',
-                    new Rect(
-                        0,
-                        Math.round(canvasHeight / 4),
-                        Math.round(canvasWidth * 0.5),
-                        Math.round(canvasWidth * 0.5)
-                    )
-                );
-            } else {
-                let messageFontSize = Math.round(canvasHeight / 9);
-                let messageOffset = Math.round(messageFontSize * 1.5);
+        if (festivalBG) {
+            let rate =
+                festivalBG.size.width > festivalBG.size.height
+                    ? festivalBG.size.height / festivalBG.size.width
+                    : festivalBG.size.width / festivalBG.size.height;
 
-                let exclamation = SFSymbol.named('exclamationmark.circle').image;
-                canvas.drawImageInRect(
-                    exclamation,
-                    new Rect(0, messageOffset, Math.round(messageFontSize * 1.2), Math.round(messageFontSize * 1.2))
-                );
+            canvas.drawImageInRect(
+                festivalBG,
+                new Rect(
+                    0, //
+                    Math.round(canvasHeight * 0.04),
+                    Math.round(canvasHeight * 0.9) * rate,
+                    Math.round(canvasHeight * 0.9)
+                )
+            );
+        } else {
+            try {
+                let checkControlMessages = this.getControlMessages(data);
 
-                canvas.setFont(this.getFont(WIDGET_FONT, messageFontSize));
-                canvas.setTextColor(this.getFontColor());
-
-                for (const checkControlMessage of checkControlMessages) {
+                if (checkControlMessages && checkControlMessages.length == 0) {
                     canvas.drawTextInRect(
-                        checkControlMessage.title,
+                        'ALL',
                         new Rect(
-                            Math.round(messageFontSize * 1.5),
-                            messageOffset,
+                            0, //
+                            0,
                             Math.round(canvasWidth * 0.5),
                             Math.round(canvasWidth * 0.5)
                         )
                     );
+                    canvas.drawTextInRect(
+                        'GOOD',
+                        new Rect(
+                            0,
+                            Math.round(canvasHeight / 4),
+                            Math.round(canvasWidth * 0.5),
+                            Math.round(canvasWidth * 0.5)
+                        )
+                    );
+                } else {
+                    let messageFontSize = Math.round(canvasHeight / 9);
+                    let messageOffset = Math.round(messageFontSize * 1.5);
 
-                    messageOffset = messageOffset + messageFontSize;
+                    let exclamation = SFSymbol.named('exclamationmark.circle').image;
+                    canvas.drawImageInRect(
+                        exclamation,
+                        new Rect(0, messageOffset, Math.round(messageFontSize * 1.2), Math.round(messageFontSize * 1.2))
+                    );
+
+                    canvas.setFont(this.getFont(WIDGET_FONT, messageFontSize));
+                    canvas.setTextColor(this.getFontColor());
+
+                    for (const checkControlMessage of checkControlMessages) {
+                        canvas.drawTextInRect(
+                            checkControlMessage.title,
+                            new Rect(
+                                Math.round(messageFontSize * 1.5),
+                                messageOffset,
+                                Math.round(canvasWidth * 0.5),
+                                Math.round(canvasWidth * 0.5)
+                            )
+                        );
+
+                        messageOffset = messageOffset + messageFontSize;
+                    }
                 }
+            } catch (e) {
+                console.warn(e.message);
             }
-        } catch (e) {
-            console.warn(e.message);
         }
 
         let carImage = await this.getVehicleImage(data);
@@ -2071,6 +2091,46 @@ class Widget extends Base {
         );
 
         return canvas.getImage();
+    }
+
+    async getFestivalBackground() {
+        let url = null;
+        let now = new Date();
+        let currentMonth = now.getMonth() + 1;
+        let currentDate = now.getDate();
+
+        if (currentMonth == 12) {
+            if (currentDate >= 21 && currentDate <= 30) {
+                url = 'https://s4.ax1x.com/2021/12/21/TMxdZF.png'; // Xmas
+            }
+            if (currentDate >= 31) {
+                url = 'https://s4.ax1x.com/2021/12/21/TQFDvd.png'; // new year
+            }
+        }
+
+        if (currentMonth == 1) {
+            if (currentDate >= 1 && currentDate <= 3) {
+                url = 'https://s4.ax1x.com/2021/12/21/TQFDvd.png'; // new year
+            }
+            if (currentDate >= 27 && currentDate <= 31) {
+                url = 'https://s4.ax1x.com/2021/12/21/TQP2Lt.png';
+            }
+        }
+
+        if (currentMonth == 2) {
+            if (currentDate >= 1 && currentDate <= 7) {
+                url = 'https://s4.ax1x.com/2021/12/21/TQP2Lt.png';
+            }
+        }
+
+        try {
+            if (!url) {
+                return null;
+            }
+            return await this.getImageByUrl(url);
+        } catch (e) {
+            return null;
+        }
     }
 
     getFocusedBackgroundColor() {
@@ -2532,15 +2592,85 @@ class Widget extends Base {
             Keychain.set(MY_BMW_LAST_CHECK_IN_AT, today);
         }
 
-        console.log(res);
-
         let msg = `${res.message || ''}`;
 
         if (res.code != 200) {
             msg += `: ${res.businessCode || ''}, 上次签到: ${lastCheckIn || 'None'}.`;
+            this.notify('My BMW签到', msg);
         }
 
-        this.notify('My BMW签到', msg);
+        try {
+            await this.fakeShareToGetMoreCoin(accesstoken);
+        } catch (e) {
+            console.error(e.message);
+        }
+
+        // check coin amount
+        try {
+            await this.getJoyCoinInfo(accesstoken);
+        } catch (e) {
+            console.error(e.message);
+        }
+    }
+
+    async getJoyCoinInfo(accesstoken) {
+        let req = new Request(BMW_SERVER_HOST + '/cis/eadrax-membership/api/v2/joy-list');
+
+        req.headers = {
+            ...BMW_HEADERS,
+            authorization: 'Bearer ' + accesstoken,
+            'content-type': 'application/json; charset=utf-8'
+        };
+
+        req.method = 'POST';
+        req.body = JSON.stringify({});
+
+        const res = await req.loadJSON();
+        if (res.code >= 200 && res.code < 300) {
+            let message = `签到成功，当前共${res.data.joyCoin || 0} JOY币， ${res.data.joySocialHeader}`;
+            console.log(message);
+            this.notify('My BMW签到', message);
+        }
+    }
+
+    async fakeShareToGetMoreCoin(accesstoken) {
+        console.log('Start to fake post');
+
+        let req = new Request(BMW_SERVER_HOST + '/cis/eadrax-ocommunity/public-api/v1/article-list');
+        req.headers = {
+            ...BMW_HEADERS,
+            authorization: 'Bearer ' + accesstoken,
+            'content-type': 'application/json; charset=utf-8'
+        };
+
+        req.method = 'POST';
+        req.body = JSON.stringify({pageNum: 1, pageSize: 1, boardCode: 0});
+
+        const res = await req.loadJSON();
+
+        if (Number(res.code) >= 200 && Number(res.code) <= 300) {
+            if (!res.data || !res.data.articleVos || !res.data.articleVos[0] || !res.data.articleVos[0].articleId) {
+                throw 'No article found';
+            }
+
+            // then fake post article to get Joy coin
+            req = new Request(BMW_SERVER_HOST + '/cis/eadrax-oarticle/open/article/api/v2/share-article');
+
+            req.headers = {
+                ...BMW_HEADERS,
+                authorization: 'Bearer ' + accesstoken,
+                'content-type': 'application/json; charset=utf-8'
+            };
+
+            req.method = 'POST';
+            req.body = JSON.stringify({articleId: res.data.articleVos[0].articleId});
+
+            const result = await req.loadJSON();
+
+            return !!result;
+        }
+
+        return false;
     }
 
     async getBmwOfficialImage(data, useCache = true) {
