@@ -27,8 +27,8 @@ let WIDGET_FONT_BOLD = 'SF UI Display Bold';
 let BMW_SERVER_HOST = 'https://bmw-1.api.zhis.ltd';
 let APP_HOST_SERVER = 'https://bmw-1.api.zhis.ltd';
 
-let JS_CDN_SERVER = 'https://cdn.jsdelivr.net/gh/opp100/bmw-scriptable-widgets@main/Publish/';
-let JS_LIB_CDN_SERVER = 'https://cdn.jsdelivr.net/gh/opp100/bmw-scriptable-widgets/lib';
+let JS_CDN_SERVER = 'https://raw.githubusercontent.com/galenzhao/bmw-scriptable-widgets/main/Publish/';
+let JS_LIB_CDN_SERVER = 'https://raw.githubusercontent.com/galenzhao/bmw-scriptable-widgets/main/lib/';
 
 
 let DEFAULT_BG_COLOR_LIGHT = '#FFFFFF';
